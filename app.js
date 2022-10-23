@@ -1,9 +1,32 @@
 const express = require('express')
 const Joi = require('joi')
 const app = express()
+const morgran = require('morgan')
+const config = require('config')
 
-//Middle ware
-app.use(express.json())
+//custom middlewares
+const { log, auth } = require('./middlewares')
+
+//builtin middlewares
+app.use(express.json())//Json to req.body
+app.use(express.urlencoded())//key=val&key=val to req.body
+app.use(express.static('./public'))//serve static assets/files/css/.. --> { http://localhost:3000/readme.txt }
+
+//calling custom middlewares
+app.use(log)
+app.use(auth)
+
+//Configurations
+console.log("App Name: ", config.get('name') )
+console.log("App Mail Host: ", config.get('mail.host') )
+console.log("App Password: ", config.get('mail.password') )
+
+
+if(app.get('env') === 'development'){
+app.use(morgran('tiny'))
+console.log("Running on development env...")
+
+}
 
 const courses = [
     { id: 1, name: "MVP Course 1"},
